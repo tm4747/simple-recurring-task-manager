@@ -15,8 +15,10 @@ struct ContentView: View {
     // ContentView pattern.
     @Query private var allSettings: [AppSettings]
     @Query private var allTasks: [TaskItem]
+    @Query private var allCars: [Car]
     @Environment(\.scenePhase) private var scenePhase
     @State private var isShowingDoNow = false
+    @State private var isShowingMileagePrompt = false
 
     private var currentTheme: Theme {
         Theme.resolve(allSettings.first?.theme ?? .light)
@@ -24,6 +26,12 @@ struct ContentView: View {
 
     private var dueTasks: [TaskItem] {
         allTasks.filter(\.isDueForDecision)
+    }
+
+    // Do Now takes priority over mileage prompting — both are full-screen, so
+    // only one shows at a time.
+    private var carsNeedingMileagePrompt: [Car] {
+        allCars.filter { MileageEngine.isPromptDue(for: $0) }
     }
 
     var body: some View {
@@ -42,6 +50,10 @@ struct ContentView: View {
         .preferredColorScheme(currentTheme.appTheme == .light ? .light : .dark)
         .fullScreenCover(isPresented: $isShowingDoNow) {
             DoNowContainerView(isPresented: $isShowingDoNow)
+                .environment(\.theme, currentTheme)
+        }
+        .fullScreenCover(isPresented: $isShowingMileagePrompt) {
+            MileagePromptContainerView(isPresented: $isShowingMileagePrompt)
                 .environment(\.theme, currentTheme)
         }
         .task {
@@ -70,7 +82,12 @@ struct ContentView: View {
     }
 
     private func refreshDueState() {
-        guard !dueTasks.isEmpty else { return }
+        guard !dueTasks.isEmpty else {
+            if !carsNeedingMileagePrompt.isEmpty {
+                isShowingMileagePrompt = true
+            }
+            return
+        }
         isShowingDoNow = true
         let settings = allSettings.first
         let sound = AlarmSound(rawValue: settings?.alarmSound ?? "default") ?? .systemDefault

@@ -312,7 +312,11 @@ struct TaskFormView: View {
         task.mileageTrigger = isCarMaintenance ? mileageTrigger : nil
         task.timeTriggerMonths = isCarMaintenance ? timeTriggerMonths : nil
         task.updatedAt = Date()
-        task.nextDue = RecurrenceEngine.recalculatedNextDue(for: task)
+        if let car = task.car {
+            task.nextDue = MileageEngine.recalculatedNextDue(for: task, car: car)
+        } else {
+            task.nextDue = RecurrenceEngine.recalculatedNextDue(for: task)
+        }
 
         let settings = AppSettings.shared(in: modelContext)
         let alarmSound = AlarmSound(rawValue: settings.alarmSound) ?? .systemDefault

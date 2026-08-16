@@ -217,14 +217,24 @@ struct DoNowView: View {
 
     private func markDone(note: String? = nil, wasDone: Bool = true) {
         let trimmedNote = note?.trimmingCharacters(in: .whitespacesAndNewlines)
-        let doneItem = TaskDoneItem(task: task, wasDone: wasDone, note: (trimmedNote?.isEmpty == false) ? trimmedNote : nil)
+        let mileageAtCompletion = task.car.flatMap { MileageEngine.estimatedCurrentMileage(for: $0) }
+        let doneItem = TaskDoneItem(
+            task: task,
+            wasDone: wasDone,
+            note: (trimmedNote?.isEmpty == false) ? trimmedNote : nil,
+            mileageAtCompletion: mileageAtCompletion
+        )
         modelContext.insert(doneItem)
         task.isOverdue = false
         task.status = .pending
         task.snoozeUntil = nil
         task.doingNowDeadline = nil
         task.updatedAt = Date()
-        task.nextDue = RecurrenceEngine.recalculatedNextDue(for: task)
+        if let car = task.car {
+            task.nextDue = MileageEngine.recalculatedNextDue(for: task, car: car)
+        } else {
+            task.nextDue = RecurrenceEngine.recalculatedNextDue(for: task)
+        }
         rescheduleNotifications(fireDate: task.nextDue)
         AlarmPlayer.shared.stop()
         doneNoteText = ""
