@@ -270,6 +270,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SimpleRecurringTaskManager/Info.plist;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Simple Recurring Task Manager uses the microphone to convert your voice into text.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Simple Recurring Task Manager uses speech recognition to turn spoken words into text.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -303,6 +305,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SimpleRecurringTaskManager/Info.plist;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Simple Recurring Task Manager uses the microphone to convert your voice into text.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Simple Recurring Task Manager uses speech recognition to turn spoken words into text.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
