@@ -5,10 +5,13 @@
 
 import SwiftUI
 import SwiftData
+import UserNotifications
+import UIKit
 
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.theme) private var theme
+    @Environment(\.scenePhase) private var scenePhase
 
     // Kept in sync with AppSettings.selectedTheme so a theme change made via the
     // header bar's ThemeSwitchButton (same AppSettings record) is reflected here
@@ -26,6 +29,9 @@ struct SettingsView: View {
     @State private var weekendDefaultTime = AppSettings.nextWeekday(.saturday, hour: 9, minute: 0)
     @State private var widgetEnabled = true
     @State private var hasLoaded = false
+    // Optimistic default avoids flashing the warning before the first async check
+    // completes.
+    @State private var notificationsAuthorized = true
 
     var body: some View {
         NavigationStack {
@@ -37,6 +43,11 @@ struct SettingsView: View {
         }
         .themedScreenBackground()
         .onAppear { loadIfNeeded() }
+        .task { await refreshNotificationStatus() }
+        .onChange(of: scenePhase) { _, newPhase in
+            guard newPhase == .active else { return }
+            Task { await refreshNotificationStatus() }
+        }
         .onChange(of: selectedTheme) { _, _ in save() }
         .onChange(of: alarmSound) { _, _ in save() }
         .onChange(of: alarmDurationSeconds) { _, _ in save() }
@@ -52,6 +63,18 @@ struct SettingsView: View {
 
     private var settingsForm: some View {
         Form {
+            if !notificationsAuthorized {
+                Section {
+                    Text("Notifications are turned off. Tasks may not alert you reliably when the app isn't open.")
+                        .foregroundStyle(theme.colors.destructive)
+                    Button("Open Settings") {
+                        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+                        UIApplication.shared.open(url)
+                    }
+                }
+                .listRowBackground(theme.colors.surface)
+            }
+
             Section {
                 Picker("Alarm Sound", selection: $alarmSound) {
                     ForEach(AlarmSound.allCases) { sound in
@@ -188,6 +211,14 @@ struct SettingsView: View {
 
     private func otherSnoozeDurations(excluding option: SnoozeOption) -> Set<Int> {
         Set(snoozeOptions.filter { $0.id != option.id }.map(\.durationSeconds))
+    }
+
+    // Re-checked on every foreground (not just once), since the user may grant or
+    // revoke notification access from system Settings without relaunching.
+    private func refreshNotificationStatus() async {
+        let settings = await UNUserNotificationCenter.current().notificationSettings()
+        notificationsAuthorized = settings.authorizationStatus == .authorized
+            || settings.authorizationStatus == .provisional
     }
 
     // MARK: - Persistence

@@ -16,6 +16,7 @@ struct CarEditView: View {
     @Bindable var car: Car
 
     @State private var newMileageText = ""
+    @FocusState private var isNameFocused: Bool
 
     private var sortedEntries: [MileageEntry] {
         car.mileageEntries.sorted { $0.recordedAt > $1.recordedAt }
@@ -24,7 +25,7 @@ struct CarEditView: View {
     var body: some View {
         Form {
             Section {
-                TextField("Car Name", text: $car.name)
+                SpokenLabelField(text: $car.name, placeholder: "Car Name", isFocused: $isNameFocused)
                     .listRowBackground(theme.colors.surface)
             } header: {
                 Text("Name")

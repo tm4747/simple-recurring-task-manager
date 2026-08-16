@@ -114,6 +114,16 @@ struct TaskFormView: View {
         } message: {
             Text("This can't be undone.")
         }
+        // "No cars exist when selecting Car Maintenance category: redirect to car
+        // creation flow before task creation continues" — per the PRD's edge
+        // cases. Only fires the moment the category switches to Car Maintenance,
+        // not on every re-render, so dismissing NewCarView without saving doesn't
+        // immediately reopen it.
+        .onChange(of: selectedCategory) { _, _ in
+            if isCarMaintenance && cars.isEmpty {
+                isShowingNewCar = true
+            }
+        }
         .onAppear { loadIfNeeded() }
     }
 

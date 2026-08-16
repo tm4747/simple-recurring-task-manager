@@ -18,6 +18,7 @@ struct NewCarView: View {
     @State private var name = ""
     @State private var mileageText = ""
     @State private var monthlyEstimateText = ""
+    @FocusState private var isNameFocused: Bool
 
     var onCreate: (Car) -> Void
 
@@ -38,7 +39,7 @@ struct NewCarView: View {
             ScreenHeaderBar(title: "New Car", onBack: { dismiss() })
             Form {
                 Section {
-                    TextField("Car Name", text: $name)
+                    SpokenLabelField(text: $name, placeholder: "Car Name", isFocused: $isNameFocused)
                         .listRowBackground(theme.colors.surface)
                 } header: {
                     Text("Name")
