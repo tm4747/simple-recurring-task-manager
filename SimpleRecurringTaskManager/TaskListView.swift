@@ -42,7 +42,7 @@ struct TaskListView: View {
         .themedScreenBackground()
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $isShowingNewTask) {
-            Text("New Task — coming soon")
+            TaskFormView()
                 .environment(\.theme, theme)
         }
         .sheet(isPresented: $isShowingNewCategory) {
