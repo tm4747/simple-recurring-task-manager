@@ -314,11 +314,16 @@ struct TaskFormView: View {
         task.updatedAt = Date()
         task.nextDue = RecurrenceEngine.recalculatedNextDue(for: task)
 
+        let settings = AppSettings.shared(in: modelContext)
+        let alarmSound = AlarmSound(rawValue: settings.alarmSound) ?? .systemDefault
+        NotificationScheduler.shared.reschedule(for: task, alarmSound: alarmSound)
+
         dismiss()
     }
 
     private func deleteTask() {
         guard let task = taskToEdit else { return }
+        NotificationScheduler.shared.cancel(taskID: task.id)
         modelContext.delete(task)
         dismiss()
     }

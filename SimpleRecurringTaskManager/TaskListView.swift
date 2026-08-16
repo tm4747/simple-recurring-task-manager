@@ -100,6 +100,7 @@ struct TaskListView: View {
             presenting: taskPendingDelete
         ) { task in
             Button("Delete", role: .destructive) {
+                NotificationScheduler.shared.cancel(taskID: task.id)
                 modelContext.delete(task)
             }
             Button("Cancel", role: .cancel) {}
