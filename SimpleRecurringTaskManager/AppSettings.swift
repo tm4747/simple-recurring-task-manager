@@ -46,3 +46,25 @@ final class AppSettings {
         return Calendar.current.date(from: components) ?? Date()
     }
 }
+
+extension AppSettings {
+    var theme: AppTheme {
+        get { AppTheme(rawValue: selectedTheme) ?? .light }
+        set { selectedTheme = newValue.rawValue }
+    }
+}
+
+extension AppSettings {
+    /// Returns the single AppSettings record, creating it if absent (mirrors
+    /// DefaultDataSeeder's first-launch seed, as a fallback for call sites that run
+    /// before or independently of it).
+    static func shared(in context: ModelContext) -> AppSettings {
+        let descriptor = FetchDescriptor<AppSettings>()
+        if let existing = try? context.fetch(descriptor), let settings = existing.first {
+            return settings
+        }
+        let settings = AppSettings()
+        context.insert(settings)
+        return settings
+    }
+}

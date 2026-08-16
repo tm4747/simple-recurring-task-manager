@@ -10,9 +10,22 @@
 		624DA35230316D9F0057AA87 /* SimpleRecurringTaskManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SimpleRecurringTaskManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		624DA36230316DA00057AA88 /* Exceptions for "SimpleRecurringTaskManager" folder in "SimpleRecurringTaskManager" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 624DA35130316D9F0057AA87 /* SimpleRecurringTaskManager */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		624DA35430316D9F0057AA87 /* SimpleRecurringTaskManager */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				624DA36230316DA00057AA88 /* Exceptions for "SimpleRecurringTaskManager" folder in "SimpleRecurringTaskManager" target */,
+			);
 			path = SimpleRecurringTaskManager;
 			sourceTree = "<group>";
 		};
@@ -256,6 +269,7 @@
 				DEVELOPMENT_TEAM = VGEXA6ZRP3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SimpleRecurringTaskManager/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -288,6 +302,7 @@
 				DEVELOPMENT_TEAM = VGEXA6ZRP3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SimpleRecurringTaskManager/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
