@@ -87,3 +87,20 @@ final class TaskItem {
         self.updatedAt = updatedAt
     }
 }
+
+extension TaskItem {
+    /// True whenever this task currently needs a user decision — its next_due,
+    /// snooze, or doing/checking-now countdown has passed. Drives both the
+    /// foreground alarm trigger (ContentView) and the Do Now queue (Phase 8/9).
+    var isDueForDecision: Bool {
+        let now = Date()
+        switch status {
+        case .doingNow, .checkingNow:
+            return (doingNowDeadline ?? .distantFuture) <= now
+        case .snoozed:
+            return (snoozeUntil ?? .distantFuture) <= now
+        case .pending, .active, .deferred:
+            return isOverdue || (nextDue.map { $0 <= now } ?? false)
+        }
+    }
+}

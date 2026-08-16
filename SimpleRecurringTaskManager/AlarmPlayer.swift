@@ -18,9 +18,19 @@ final class AlarmPlayer {
     private var player: AVAudioPlayer?
     private var systemSoundTimer: Timer?
     private var stopWorkItem: DispatchWorkItem?
+    private(set) var isPlaying = false
+
+    /// Callers that re-check "is something due" on a timer (e.g. ContentView's
+    /// periodic poll) should call this instead of `play` directly — it's a no-op
+    /// while already looping, so the sound doesn't audibly restart every poll.
+    func playIfNeeded(sound: AlarmSound, durationSeconds: Int) {
+        guard !isPlaying else { return }
+        play(sound: sound, durationSeconds: durationSeconds)
+    }
 
     func play(sound: AlarmSound, durationSeconds: Int) {
         stop()
+        isPlaying = true
 
         let session = AVAudioSession.sharedInstance()
         try? session.setCategory(.playback, options: [.duckOthers])
@@ -45,6 +55,7 @@ final class AlarmPlayer {
     }
 
     func stop() {
+        isPlaying = false
         player?.stop()
         player = nil
         systemSoundTimer?.invalidate()
