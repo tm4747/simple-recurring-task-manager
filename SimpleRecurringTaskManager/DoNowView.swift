@@ -4,8 +4,10 @@
 //
 //  The action screen for a single due task. Standard-task actions (Phase 8):
 //  Done, I'll Do It Now (+ the "Are you done?" follow-up once its countdown
-//  expires), Snooze, Do It This Evening/Tomorrow/This-or-Next-Weekend. Every
-//  action stops the alarm (interacting with it is what "until the user
+//  expires), Snooze, Do It This Evening/Tomorrow/This-or-Next-Weekend. Check-first
+//  actions (Phase 9): I'll Check It Now (+ the "Did you check it?" follow-up,
+//  which for "I checked it" branches again into "does it need to be done?").
+//  Every action stops the alarm (interacting with it is what "until the user
 //  interacts" means) and reschedules notifications around whatever new date the
 //  action implies.
 //
@@ -27,12 +29,23 @@ struct DoNowView: View {
     @State private var doneNoteText = ""
     @State private var isShowingTimeTakesToDoPrompt = false
     @State private var pendingDoNowSeconds = 1800
+    @State private var isShowingNeedsDoneCheck = false
+    // Set after "I Didn't Do It" / "I Didn't Check It" — hides the Done button for
+    // the rest of this Do Now session, per the PRD's "same options minus Done"
+    // rule. Deliberately local @State, not persisted on the task: a fresh due
+    // cycle later (new snooze/defer arriving, a brand-new DoNowView instance)
+    // should offer Done normally again, not carry this forward forever.
+    @State private var hideDoneButton = false
     @FocusState private var isNoteFocused: Bool
 
     private var settings: AppSettings { allSettings.first ?? AppSettings() }
 
     private var isAwaitingDoneCheck: Bool {
         task.status == .doingNow && (task.doingNowDeadline ?? .distantFuture) <= Date()
+    }
+
+    private var isAwaitingCheckResult: Bool {
+        task.status == .checkingNow && (task.doingNowDeadline ?? .distantFuture) <= Date()
     }
 
     var body: some View {
@@ -43,6 +56,12 @@ struct DoNowView: View {
                     taskSummary
                     if isAwaitingDoneCheck {
                         areYouDonePrompt
+                    } else if isAwaitingCheckResult {
+                        if isShowingNeedsDoneCheck {
+                            needsDoneCheckPrompt
+                        } else {
+                            didYouCheckItPrompt
+                        }
                     } else {
                         standardActions
                     }
@@ -86,18 +105,54 @@ struct DoNowView: View {
         }
     }
 
+    private var didYouCheckItPrompt: some View {
+        VStack(spacing: 12) {
+            Text("Did you check it?")
+                .font(theme.typography.headline)
+                .foregroundStyle(theme.colors.primaryText)
+            Button("I Checked It") { isShowingNeedsDoneCheck = true }
+                .buttonStyle(PrimaryButtonStyle())
+                .frame(maxWidth: .infinity)
+            Button("I Didn't Check It") { handleDidNotCheckIt() }
+                .buttonStyle(SecondaryButtonStyle())
+                .frame(maxWidth: .infinity)
+        }
+    }
+
+    private var needsDoneCheckPrompt: some View {
+        VStack(spacing: 12) {
+            Text("Does it need to be done?")
+                .font(theme.typography.headline)
+                .foregroundStyle(theme.colors.primaryText)
+            Button("It Needs to Be Done") { handleNeedsToBeDone() }
+                .buttonStyle(PrimaryButtonStyle())
+                .frame(maxWidth: .infinity)
+            Button("It Does Not Need to Be Done") { handleDoesNotNeedToBeDone() }
+                .buttonStyle(SecondaryButtonStyle())
+                .frame(maxWidth: .infinity)
+        }
+    }
+
     private var standardActions: some View {
         VStack(spacing: 12) {
-            Button("Done") {
-                doneNoteText = ""
-                isShowingDoneNote = true
+            if !hideDoneButton {
+                Button("Done") {
+                    doneNoteText = ""
+                    isShowingDoneNote = true
+                }
+                .buttonStyle(PrimaryButtonStyle())
+                .frame(maxWidth: .infinity)
             }
-            .buttonStyle(PrimaryButtonStyle())
-            .frame(maxWidth: .infinity)
 
             Button("I'll Do It Now") { startDoingNow() }
                 .buttonStyle(SecondaryButtonStyle())
                 .frame(maxWidth: .infinity)
+
+            if task.isCheckFirst {
+                Button("I'll Check It Now") { startCheckingNow() }
+                    .buttonStyle(SecondaryButtonStyle())
+                    .frame(maxWidth: .infinity)
+            }
 
             HoldMenuButton(title: "Snooze", action: { snooze(seconds: settings.defaultSnoozeSeconds) }) {
                 ForEach(snoozeOptions) { option in
@@ -209,6 +264,44 @@ struct DoNowView: View {
         task.status = .pending
         task.doingNowDeadline = nil
         task.updatedAt = Date()
+        hideDoneButton = true
+        AlarmPlayer.shared.stop()
+    }
+
+    private func startCheckingNow() {
+        guard let checkSeconds = task.timeTakesToCheck else { return }
+        task.status = .checkingNow
+        let deadline = Date().addingTimeInterval(checkSeconds)
+        task.doingNowDeadline = deadline
+        task.updatedAt = Date()
+        NotificationScheduler.shared.scheduleDeadlinePrompt(
+            taskID: task.id,
+            title: task.title,
+            body: "Did you check it?",
+            fireDate: deadline,
+            alarmSound: currentAlarmSound()
+        )
+        AlarmPlayer.shared.stop()
+    }
+
+    private func handleNeedsToBeDone() {
+        isShowingNeedsDoneCheck = false
+        task.status = .pending
+        task.doingNowDeadline = nil
+        task.updatedAt = Date()
+    }
+
+    private func handleDoesNotNeedToBeDone() {
+        isShowingNeedsDoneCheck = false
+        markDone(wasDone: false)
+    }
+
+    private func handleDidNotCheckIt() {
+        task.isOverdue = true
+        task.status = .pending
+        task.doingNowDeadline = nil
+        task.updatedAt = Date()
+        hideDoneButton = true
         AlarmPlayer.shared.stop()
     }
 
