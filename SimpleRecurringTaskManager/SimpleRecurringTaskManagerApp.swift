@@ -12,7 +12,13 @@ import SwiftData
 struct SimpleRecurringTaskManagerApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            Car.self,
+            MileageEntry.self,
+            Category.self,
+            TaskItem.self,
+            TaskDoneItem.self,
+            SnoozeOption.self,
+            AppSettings.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -22,6 +28,10 @@ struct SimpleRecurringTaskManagerApp: App {
             fatalError("Could not create ModelContainer: \(error)")
         }
     }()
+
+    init() {
+        DefaultDataSeeder.seedAllIfNeeded(context: sharedModelContainer.mainContext)
+    }
 
     var body: some Scene {
         WindowGroup {
