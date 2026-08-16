@@ -6,8 +6,42 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		624DA49130317A0E0057AA87 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 624DA49030317A0E0057AA87 /* WidgetKit.framework */; };
+		624DA49330317A0E0057AA87 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 624DA49230317A0E0057AA87 /* SwiftUI.framework */; };
+		624DA49E30317A100057AA87 /* SimpleRecurringTaskManagerWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 624DA48E30317A0E0057AA87 /* SimpleRecurringTaskManagerWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		624DA49C30317A100057AA87 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 624DA34A30316D9F0057AA87 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 624DA48D30317A0E0057AA87;
+			remoteInfo = SimpleRecurringTaskManagerWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		624DA4A330317A100057AA87 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				624DA49E30317A100057AA87 /* SimpleRecurringTaskManagerWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		624DA35230316D9F0057AA87 /* SimpleRecurringTaskManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SimpleRecurringTaskManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		624DA48E30317A0E0057AA87 /* SimpleRecurringTaskManagerWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SimpleRecurringTaskManagerWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		624DA49030317A0E0057AA87 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		624DA49230317A0E0057AA87 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		624DA4A430317A450057AA87 /* SimpleRecurringTaskManagerWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SimpleRecurringTaskManagerWidgetExtension.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -17,6 +51,13 @@
 				Info.plist,
 			);
 			target = 624DA35130316D9F0057AA87 /* SimpleRecurringTaskManager */;
+		};
+		624DA4A230317A100057AA87 /* Exceptions for "SimpleRecurringTaskManagerWidget" folder in "SimpleRecurringTaskManagerWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 624DA48D30317A0E0057AA87 /* SimpleRecurringTaskManagerWidgetExtension */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -29,6 +70,14 @@
 			path = SimpleRecurringTaskManager;
 			sourceTree = "<group>";
 		};
+		624DA49430317A0E0057AA87 /* SimpleRecurringTaskManagerWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				624DA4A230317A100057AA87 /* Exceptions for "SimpleRecurringTaskManagerWidget" folder in "SimpleRecurringTaskManagerWidgetExtension" target */,
+			);
+			path = SimpleRecurringTaskManagerWidget;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -39,13 +88,25 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		624DA48B30317A0E0057AA87 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				624DA49330317A0E0057AA87 /* SwiftUI.framework in Frameworks */,
+				624DA49130317A0E0057AA87 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		624DA34930316D9F0057AA87 = {
 			isa = PBXGroup;
 			children = (
+				624DA4A430317A450057AA87 /* SimpleRecurringTaskManagerWidgetExtension.entitlements */,
 				624DA35430316D9F0057AA87 /* SimpleRecurringTaskManager */,
+				624DA49430317A0E0057AA87 /* SimpleRecurringTaskManagerWidget */,
+				624DA48F30317A0E0057AA87 /* Frameworks */,
 				624DA35330316D9F0057AA87 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -54,8 +115,18 @@
 			isa = PBXGroup;
 			children = (
 				624DA35230316D9F0057AA87 /* SimpleRecurringTaskManager.app */,
+				624DA48E30317A0E0057AA87 /* SimpleRecurringTaskManagerWidgetExtension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		624DA48F30317A0E0057AA87 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				624DA49030317A0E0057AA87 /* WidgetKit.framework */,
+				624DA49230317A0E0057AA87 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -68,10 +139,12 @@
 				624DA34E30316D9F0057AA87 /* Sources */,
 				624DA34F30316D9F0057AA87 /* Frameworks */,
 				624DA35030316D9F0057AA87 /* Resources */,
+				624DA4A330317A100057AA87 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				624DA49D30317A100057AA87 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				624DA35430316D9F0057AA87 /* SimpleRecurringTaskManager */,
@@ -82,6 +155,28 @@
 			productName = SimpleRecurringTaskManager;
 			productReference = 624DA35230316D9F0057AA87 /* SimpleRecurringTaskManager.app */;
 			productType = "com.apple.product-type.application";
+		};
+		624DA48D30317A0E0057AA87 /* SimpleRecurringTaskManagerWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 624DA49F30317A100057AA87 /* Build configuration list for PBXNativeTarget "SimpleRecurringTaskManagerWidgetExtension" */;
+			buildPhases = (
+				624DA48A30317A0E0057AA87 /* Sources */,
+				624DA48B30317A0E0057AA87 /* Frameworks */,
+				624DA48C30317A0E0057AA87 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				624DA49430317A0E0057AA87 /* SimpleRecurringTaskManagerWidget */,
+			);
+			name = SimpleRecurringTaskManagerWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = SimpleRecurringTaskManagerWidgetExtension;
+			productReference = 624DA48E30317A0E0057AA87 /* SimpleRecurringTaskManagerWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -94,6 +189,9 @@
 				LastUpgradeCheck = 2650;
 				TargetAttributes = {
 					624DA35130316D9F0057AA87 = {
+						CreatedOnToolsVersion = 26.5;
+					};
+					624DA48D30317A0E0057AA87 = {
 						CreatedOnToolsVersion = 26.5;
 					};
 				};
@@ -113,12 +211,20 @@
 			projectRoot = "";
 			targets = (
 				624DA35130316D9F0057AA87 /* SimpleRecurringTaskManager */,
+				624DA48D30317A0E0057AA87 /* SimpleRecurringTaskManagerWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		624DA35030316D9F0057AA87 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		624DA48C30317A0E0057AA87 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -135,7 +241,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		624DA48A30317A0E0057AA87 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		624DA49D30317A100057AA87 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 624DA48D30317A0E0057AA87 /* SimpleRecurringTaskManagerWidgetExtension */;
+			targetProxy = 624DA49C30317A100057AA87 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		624DA35D30316DA00057AA87 /* Debug */ = {
@@ -264,6 +385,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = SimpleRecurringTaskManager/SimpleRecurringTaskManager.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = VGEXA6ZRP3;
@@ -299,6 +421,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = SimpleRecurringTaskManager/SimpleRecurringTaskManager.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = VGEXA6ZRP3;
@@ -329,6 +452,68 @@
 			};
 			name = Release;
 		};
+		624DA4A030317A100057AA87 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = SimpleRecurringTaskManagerWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = VGEXA6ZRP3;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SimpleRecurringTaskManagerWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = SimpleRecurringTaskManagerWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Tom.SimpleRecurringTaskManager.SimpleRecurringTaskManagerWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		624DA4A130317A100057AA87 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = SimpleRecurringTaskManagerWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = VGEXA6ZRP3;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SimpleRecurringTaskManagerWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = SimpleRecurringTaskManagerWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Tom.SimpleRecurringTaskManager.SimpleRecurringTaskManagerWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -346,6 +531,15 @@
 			buildConfigurations = (
 				624DA36030316DA00057AA87 /* Debug */,
 				624DA36130316DA00057AA87 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		624DA49F30317A100057AA87 /* Build configuration list for PBXNativeTarget "SimpleRecurringTaskManagerWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				624DA4A030317A100057AA87 /* Debug */,
+				624DA4A130317A100057AA87 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

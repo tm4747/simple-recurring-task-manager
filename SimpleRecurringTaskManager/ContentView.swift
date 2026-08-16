@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import WidgetKit
 
 struct ContentView: View {
     // Single place theme resolution happens; every other view just reads
@@ -19,6 +20,7 @@ struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var isShowingDoNow = false
     @State private var isShowingMileagePrompt = false
+    @State private var deepLinkedTask: TaskItem?
 
     private var currentTheme: Theme {
         Theme.resolve(allSettings.first?.theme ?? .light)
@@ -56,6 +58,16 @@ struct ContentView: View {
             MileagePromptContainerView(isPresented: $isShowingMileagePrompt)
                 .environment(\.theme, currentTheme)
         }
+        .sheet(item: $deepLinkedTask) { task in
+            TaskFormView(taskToEdit: task)
+                .environment(\.theme, currentTheme)
+        }
+        .onOpenURL { url in
+            guard url.scheme == "simplerecurringtaskmanager",
+                  url.host == "task",
+                  let taskID = UUID(uuidString: url.lastPathComponent) else { return }
+            deepLinkedTask = allTasks.first { $0.id == taskID }
+        }
         .task {
             _ = await NotificationScheduler.shared.requestAuthorization()
             NotificationScheduler.shared.registerCategories()
@@ -77,7 +89,10 @@ struct ContentView: View {
                 AlarmPlayer.shared.stop()
             }
         }
-        .onChange(of: allTasks) { _, _ in refreshDueState() }
+        .onChange(of: allTasks) { _, _ in
+            refreshDueState()
+            WidgetCenter.shared.reloadAllTimelines()
+        }
         .onAppear { refreshDueState() }
     }
 

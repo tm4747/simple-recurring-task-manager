@@ -10,24 +10,7 @@ import SwiftData
 
 @main
 struct SimpleRecurringTaskManagerApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Car.self,
-            MileageEntry.self,
-            Category.self,
-            TaskItem.self,
-            TaskDoneItem.self,
-            SnoozeOption.self,
-            AppSettings.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
+    var sharedModelContainer: ModelContainer = SharedModelContainer.make()
 
     init() {
         DefaultDataSeeder.seedAllIfNeeded(context: sharedModelContainer.mainContext)
