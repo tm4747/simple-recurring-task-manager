@@ -57,7 +57,7 @@ struct TaskListView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ScreenHeaderBar(title: "Tasks") {
+            ScreenHeaderBar(title: "Tasks", trailingAccessory: {
                 Button {
                     isShowingNewTask = true
                 } label: {
@@ -66,7 +66,7 @@ struct TaskListView: View {
                         .foregroundStyle(theme.colors.accent)
                 }
                 .accessibilityLabel("New Task")
-            }
+            })
             categoryFilterBar
             taskList
         }
