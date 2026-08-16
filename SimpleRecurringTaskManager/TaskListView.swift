@@ -205,6 +205,12 @@ struct TaskListView: View {
                 Text(rowSubtitle(for: task))
                     .font(theme.typography.caption)
                     .foregroundStyle(task.isOverdue ? theme.colors.destructive.opacity(0.8) : theme.colors.secondaryText)
+                let streak = StreakCalculator.currentStreak(for: task)
+                if streak >= 2 {
+                    Text("\(streak) in a row on time")
+                        .font(theme.typography.caption)
+                        .foregroundStyle(theme.colors.secondaryText)
+                }
             }
             .padding(.vertical, 2)
         }

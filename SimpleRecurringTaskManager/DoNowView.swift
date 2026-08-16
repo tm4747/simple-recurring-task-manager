@@ -222,7 +222,8 @@ struct DoNowView: View {
             task: task,
             wasDone: wasDone,
             note: (trimmedNote?.isEmpty == false) ? trimmedNote : nil,
-            mileageAtCompletion: mileageAtCompletion
+            mileageAtCompletion: mileageAtCompletion,
+            wasOnTime: !task.isOverdue
         )
         modelContext.insert(doneItem)
         task.isOverdue = false

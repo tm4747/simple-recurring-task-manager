@@ -16,6 +16,14 @@ final class TaskDoneItem {
     var wasDone: Bool
     var note: String?
     var mileageAtCompletion: Int?
+    /// Snapshot of `task.isOverdue` (negated) at the moment of completion — needed
+    /// for streak calculation (PRD: "a completion counts as on time if the task
+    /// was not marked overdue when completed"), since the live TaskItem.isOverdue
+    /// flag gets reset right after each completion and can't be read back
+    /// retroactively. Defaults true on the declaration so lightweight migration
+    /// backfills existing rows sensibly if this field is ever added after data
+    /// already exists.
+    var wasOnTime: Bool = true
 
     init(
         id: UUID = UUID(),
@@ -23,7 +31,8 @@ final class TaskDoneItem {
         completedAt: Date = Date(),
         wasDone: Bool,
         note: String? = nil,
-        mileageAtCompletion: Int? = nil
+        mileageAtCompletion: Int? = nil,
+        wasOnTime: Bool = true
     ) {
         self.id = id
         self.task = task
@@ -31,5 +40,6 @@ final class TaskDoneItem {
         self.wasDone = wasDone
         self.note = note
         self.mileageAtCompletion = mileageAtCompletion
+        self.wasOnTime = wasOnTime
     }
 }
