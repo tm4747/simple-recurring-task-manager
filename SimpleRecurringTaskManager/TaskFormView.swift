@@ -92,6 +92,7 @@ struct TaskFormView: View {
         }
         .themedScreenBackground()
         .toolbar(.hidden, for: .navigationBar)
+        .dismissKeyboardOnTap()
         .sheet(isPresented: $isShowingNewCategory) {
             NewCategoryView { category in
                 selectedCategory = category

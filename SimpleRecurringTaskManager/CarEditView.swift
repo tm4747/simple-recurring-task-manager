@@ -73,6 +73,7 @@ struct CarEditView: View {
         }
         .themedFormChrome()
         .navigationTitle(car.name)
+        .dismissKeyboardOnTap()
     }
 
     private func recordMileage() {

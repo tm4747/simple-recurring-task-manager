@@ -67,6 +67,7 @@ struct NewCarView: View {
         }
         .themedScreenBackground()
         .toolbar(.hidden, for: .navigationBar)
+        .dismissKeyboardOnTap()
     }
 
     private func save() {

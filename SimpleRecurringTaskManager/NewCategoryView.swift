@@ -91,6 +91,7 @@ struct NewCategoryView: View {
         }
         .themedScreenBackground()
         .toolbar(.hidden, for: .navigationBar)
+        .dismissKeyboardOnTap()
         .alert(
             "Rename Category",
             isPresented: Binding(

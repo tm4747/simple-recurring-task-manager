@@ -193,6 +193,7 @@ struct DoNowView: View {
             Spacer()
         }
         .themedScreenBackground()
+        .dismissKeyboardOnTap()
     }
 
     private var timeTakesToDoSheet: some View {

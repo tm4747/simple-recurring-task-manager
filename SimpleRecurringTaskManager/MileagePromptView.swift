@@ -44,6 +44,7 @@ struct MileagePromptView: View {
             Spacer()
         }
         .themedScreenBackground()
+        .dismissKeyboardOnTap()
         .onAppear {
             mileageText = (MileageEngine.estimatedCurrentMileage(for: car).map(String.init)) ?? ""
         }
