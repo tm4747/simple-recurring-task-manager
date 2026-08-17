@@ -7,6 +7,7 @@ import SwiftUI
 import SwiftData
 import UserNotifications
 import UIKit
+import WidgetKit
 
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
@@ -54,7 +55,10 @@ struct SettingsView: View {
         .onChange(of: defaultSnoozeSeconds) { _, _ in save() }
         .onChange(of: eveningTime) { _, _ in save() }
         .onChange(of: weekendDefaultTime) { _, _ in save() }
-        .onChange(of: widgetEnabled) { _, _ in save() }
+        .onChange(of: widgetEnabled) { _, _ in
+            save()
+            WidgetCenter.shared.reloadAllTimelines()
+        }
         .onChange(of: allSettings.first?.selectedTheme) { _, newValue in
             guard hasLoaded, let newValue, let newTheme = AppTheme(rawValue: newValue) else { return }
             selectedTheme = newTheme
@@ -138,7 +142,7 @@ struct SettingsView: View {
             } header: {
                 Text("Widget")
             } footer: {
-                Text("Shows your next 3 upcoming tasks. Add or remove it from the Home Screen using the standard iOS widget flow.")
+                Text("Turning this off hides your tasks from the widget without removing it from the Home Screen. To remove the widget itself, touch and hold it, then tap Remove Widget.")
             }
 
             if !cars.isEmpty {

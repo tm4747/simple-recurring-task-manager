@@ -7,6 +7,11 @@
 //  Shared/SharedModelContainer.swift). Each row deep-links back into the app via
 //  the simplerecurringtaskmanager:// URL scheme, handled in ContentView.
 //
+//  iOS gives an app no API to add/remove a Home Screen widget instance the user
+//  has already placed — only Settings > Home Screen Widget's toggle content: off
+//  shows a neutral placeholder instead of real task data. Actually removing the
+//  widget is still the user's own long-press > Remove Widget action.
+//
 
 import WidgetKit
 import SwiftUI
@@ -20,31 +25,46 @@ struct UpcomingTaskInfo: Identifiable {
 
 struct UpcomingTasksEntry: TimelineEntry {
     let date: Date
+    let isWidgetEnabled: Bool
     let tasks: [UpcomingTaskInfo]
 }
 
 struct Provider: TimelineProvider {
     func placeholder(in context: Context) -> UpcomingTasksEntry {
-        UpcomingTasksEntry(date: Date(), tasks: [
+        UpcomingTasksEntry(date: Date(), isWidgetEnabled: true, tasks: [
             UpcomingTaskInfo(id: UUID(), title: "Change oil", nextDue: Date().addingTimeInterval(3600)),
         ])
     }
 
     func getSnapshot(in context: Context, completion: @escaping (UpcomingTasksEntry) -> Void) {
-        completion(UpcomingTasksEntry(date: Date(), tasks: fetchUpcomingTasks()))
+        completion(makeEntry())
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<UpcomingTasksEntry>) -> Void) {
-        let entry = UpcomingTasksEntry(date: Date(), tasks: fetchUpcomingTasks())
+        let entry = makeEntry()
         // The app also calls WidgetCenter.reloadAllTimelines() after every task
-        // mutation, so this periodic refresh is just a fallback for the passage
-        // of time itself (a "due in 2 hours" row reading stale otherwise).
+        // mutation and whenever the "Home Screen Widget" setting changes, so this
+        // periodic refresh is just a fallback for the passage of time itself (a
+        // "due in 2 hours" row reading stale otherwise).
         let nextRefresh = Calendar.current.date(byAdding: .minute, value: 15, to: Date()) ?? Date().addingTimeInterval(900)
         completion(Timeline(entries: [entry], policy: .after(nextRefresh)))
     }
 
-    private func fetchUpcomingTasks() -> [UpcomingTaskInfo] {
+    private func makeEntry() -> UpcomingTasksEntry {
         let context = ModelContext(SharedModelContainer.make())
+        let isEnabled = isWidgetEnabled(context: context)
+        return UpcomingTasksEntry(
+            date: Date(),
+            isWidgetEnabled: isEnabled,
+            tasks: isEnabled ? fetchUpcomingTasks(context: context) : []
+        )
+    }
+
+    private func isWidgetEnabled(context: ModelContext) -> Bool {
+        (try? context.fetch(FetchDescriptor<AppSettings>()))?.first?.widgetEnabled ?? true
+    }
+
+    private func fetchUpcomingTasks(context: ModelContext) -> [UpcomingTaskInfo] {
         guard let allTasks = try? context.fetch(FetchDescriptor<TaskItem>()) else { return [] }
         let now = Date()
         return allTasks
@@ -67,7 +87,16 @@ struct SimpleRecurringTaskManagerWidgetEntryView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
-            if entry.tasks.isEmpty {
+            if !entry.isWidgetEnabled {
+                Spacer()
+                Text("Widget Turned Off")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                Text("Turn it back on in the app's Settings.")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                Spacer()
+            } else if entry.tasks.isEmpty {
                 Spacer()
                 Text("No Upcoming Tasks")
                     .font(.subheadline)
@@ -115,7 +144,7 @@ struct SimpleRecurringTaskManagerWidget: Widget {
 #Preview(as: .systemMedium) {
     SimpleRecurringTaskManagerWidget()
 } timeline: {
-    UpcomingTasksEntry(date: .now, tasks: [
+    UpcomingTasksEntry(date: .now, isWidgetEnabled: true, tasks: [
         UpcomingTaskInfo(id: UUID(), title: "Change oil", nextDue: Date().addingTimeInterval(3600)),
         UpcomingTaskInfo(id: UUID(), title: "Clean gutters", nextDue: Date().addingTimeInterval(86400)),
     ])
