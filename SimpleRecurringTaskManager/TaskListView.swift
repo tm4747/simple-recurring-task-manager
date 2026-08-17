@@ -175,6 +175,11 @@ struct TaskListView: View {
             } label: {
                 Image(systemName: "folder.badge.plus")
                     .foregroundStyle(theme.colors.secondaryText)
+                    // Matches ThemeSwitchButton's fixed 36pt-wide footprint
+                    // directly above, so both share the same center — an
+                    // icon-only button with no explicit width would otherwise
+                    // sit narrower than that circle and read as off-center.
+                    .frame(width: 36, height: 36)
             }
             .accessibilityLabel("New Category")
         }

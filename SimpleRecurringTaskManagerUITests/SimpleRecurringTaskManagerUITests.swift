@@ -51,4 +51,20 @@ final class SimpleRecurringTaskManagerUITests: XCTestCase {
         // After one tap it should now offer to switch to Retro next.
         XCTAssertTrue(app.buttons["Switch to Retro mode"].waitForExistence(timeout: 5))
     }
+
+    // Regression test: the New Category button (below the header) should be
+    // horizontally centered directly under the theme switcher (in the header),
+    // not just right-aligned to the same edge — an icon-only button with no
+    // explicit width sits narrower than the theme switcher's fixed 36pt circle,
+    // so right-aligning alone leaves their centers, not just their edges,
+    // mismatched.
+    func testNewCategoryButtonAlignsUnderThemeSwitchButton() {
+        let app = launchApp()
+        let themeButton = app.buttons["Switch to Dark mode"]
+        let newCategoryButton = app.buttons["New Category"]
+        XCTAssertTrue(themeButton.waitForExistence(timeout: 5))
+        XCTAssertTrue(newCategoryButton.waitForExistence(timeout: 5))
+
+        XCTAssertEqual(themeButton.frame.midX, newCategoryButton.frame.midX, accuracy: 1.0)
+    }
 }
