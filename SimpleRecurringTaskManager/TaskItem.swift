@@ -100,7 +100,14 @@ extension TaskItem {
         case .snoozed:
             return (snoozeUntil ?? .distantFuture) <= now
         case .pending, .active, .deferred:
-            return isOverdue || (nextDue.map { $0 <= now } ?? false)
+            // isOverdue is purely a display flag (red highlighting, per the
+            // PRD — it persists until the task is marked Done) and must NOT
+            // factor in here: deferTo()/snooze() both set it unconditionally
+            // the moment they run, so treating it as "still due" would reopen
+            // Do Now immediately after the user just deferred the task to a
+            // legitimately future date. Only next_due having actually passed
+            // means a decision is needed again.
+            return nextDue.map { $0 <= now } ?? false
         }
     }
 }

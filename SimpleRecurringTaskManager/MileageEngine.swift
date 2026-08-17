@@ -43,9 +43,16 @@ enum MileageEngine {
 
         var mileageDate: Date?
         if let mileageTrigger = task.mileageTrigger {
-            let referenceMileage = task.doneItems.compactMap(\.mileageAtCompletion).max() ?? car.initialMileage ?? 0
+            let currentEstimate = estimatedCurrentMileage(for: car, asOf: now) ?? 0
+            // Anchor to the mileage at the most recent completion if there is one,
+            // or the car's known starting point if not — but never fall back to a
+            // bare 0, which would understate an existing car's mileage by however
+            // much it's actually racked up and make the trigger fire far too late
+            // (or, as here, immediately, since "0 + trigger" is already behind).
+            let referenceMileage = task.doneItems.compactMap(\.mileageAtCompletion).max()
+                ?? car.initialMileage
+                ?? currentEstimate
             let targetMileage = referenceMileage + mileageTrigger
-            let currentEstimate = estimatedCurrentMileage(for: car, asOf: now) ?? referenceMileage
             let average = monthlyAverage(for: car)
             if average > 0 {
                 let monthsRemaining = Double(targetMileage - currentEstimate) / average

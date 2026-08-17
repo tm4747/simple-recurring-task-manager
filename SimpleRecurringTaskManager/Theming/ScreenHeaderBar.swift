@@ -38,6 +38,8 @@ struct ScreenHeaderBar<TrailingAccessory: View>: View {
                         .font(.system(size: 17, weight: .semibold))
                         .foregroundStyle(theme.colors.accent)
                 }
+                .accessibilityLabel("Back")
+                .accessibilityIdentifier("ScreenHeaderBar.Back")
             }
             Text(title)
                 .font(.system(size: 32, weight: .bold))

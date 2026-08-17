@@ -66,6 +66,7 @@ struct TaskListView: View {
                         .foregroundStyle(theme.colors.accent)
                 }
                 .accessibilityLabel("New Task")
+                .accessibilityIdentifier("TaskListView.NewTask")
             })
             categoryFilterBar
             taskList
