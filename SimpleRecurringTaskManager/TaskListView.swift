@@ -20,7 +20,6 @@ struct TaskListView: View {
     @State private var selectedCategory: Category?
     @State private var isShowingNewTask = false
     @State private var isShowingNewCategory = false
-    @State private var isShowingManageCategories = false
     @State private var taskPendingEdit: TaskItem?
     @State private var taskPendingDelete: TaskItem?
 
@@ -87,10 +86,6 @@ struct TaskListView: View {
             }
             .environment(\.theme, theme)
         }
-        .sheet(isPresented: $isShowingManageCategories) {
-            ManageCategoriesView()
-                .environment(\.theme, theme)
-        }
         .confirmationDialog(
             "Delete This Task?",
             isPresented: Binding(
@@ -109,8 +104,8 @@ struct TaskListView: View {
             Text("This can't be undone.")
         }
         // The filtered-out category may have just been deleted elsewhere (e.g. from
-        // ManageCategoriesView) — fall back to "All" rather than pointing at a
-        // category that no longer exists.
+        // NewCategoryView's "Existing Categories" list) — fall back to "All"
+        // rather than pointing at a category that no longer exists.
         .onChange(of: categories) { _, newValue in
             if let selectedCategory, !newValue.contains(selectedCategory) {
                 self.selectedCategory = nil
@@ -175,23 +170,13 @@ struct TaskListView: View {
 
             Spacer()
 
-            HStack(spacing: 20) {
-                Button {
-                    isShowingNewCategory = true
-                } label: {
-                    Image(systemName: "folder.badge.plus")
-                        .foregroundStyle(theme.colors.secondaryText)
-                }
-                .accessibilityLabel("New Category")
-
-                Button {
-                    isShowingManageCategories = true
-                } label: {
-                    Image(systemName: "list.bullet")
-                        .foregroundStyle(theme.colors.secondaryText)
-                }
-                .accessibilityLabel("Manage Categories")
+            Button {
+                isShowingNewCategory = true
+            } label: {
+                Image(systemName: "folder.badge.plus")
+                    .foregroundStyle(theme.colors.secondaryText)
             }
+            .accessibilityLabel("New Category")
         }
         .padding(.horizontal)
         .padding(.bottom, 8)
