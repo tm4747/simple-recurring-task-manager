@@ -32,6 +32,33 @@ struct RecurrenceEngineTests {
         #expect(RecurrenceEngine.recalculatedNextDue(for: task) == date(2026, 9, 22))
     }
 
+    // Regression test for the "alarm keeps going off after Done" bug: the
+    // just-inserted TaskDoneItem's completedAt must be usable as the anchor even
+    // when task.doneItems doesn't (yet) reflect it — otherwise this falls through
+    // to firstOccurrence, which is already in the past for a task that was just
+    // due, leaving next_due <= now and the task perpetually "due for decision".
+    @Test func justCompletedAtIsUsedAsAnchorEvenWhenDoneItemsDoesNotYetReflectIt() {
+        let firstOccurrence = date(2026, 9, 1) // already in the past relative to the completion below.
+        let task = TaskItem(title: "Water plants", recurrenceType: .weekly, firstOccurrence: firstOccurrence)
+        // Deliberately NOT appending to task.doneItems — simulating the moment
+        // right after modelContext.insert(doneItem) where the inverse relationship
+        // may not have propagated yet.
+        let completedAt = date(2026, 9, 15)
+        let next = RecurrenceEngine.recalculatedNextDue(for: task, justCompletedAt: completedAt)
+        #expect(next == date(2026, 9, 22))
+        #expect(next != firstOccurrence)
+    }
+
+    @Test func justCompletedAtCombinesWithExistingDoneItemsByTakingTheLater() {
+        let task = TaskItem(title: "Water plants", recurrenceType: .weekly, firstOccurrence: date(2026, 9, 1))
+        task.doneItems = [TaskDoneItem(task: task, completedAt: date(2026, 9, 1), wasDone: true)]
+        // A justCompletedAt earlier than an existing (later) doneItem should lose
+        // to the later one — recalculatedNextDue always anchors to the most
+        // recent completion, whichever source it came from.
+        let next = RecurrenceEngine.recalculatedNextDue(for: task, justCompletedAt: date(2026, 8, 1))
+        #expect(next == date(2026, 9, 8))
+    }
+
     @Test func dailyStepsOneDayFromLastCompletion() {
         let task = TaskItem(title: "Take medicine", recurrenceType: .daily, firstOccurrence: date(2026, 9, 1))
         task.doneItems = [TaskDoneItem(task: task, completedAt: date(2026, 9, 10), wasDone: true)]

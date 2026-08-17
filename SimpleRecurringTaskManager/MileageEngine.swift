@@ -37,8 +37,17 @@ enum MileageEngine {
 
     /// Recalculates next_due for a byMileage task: the estimated date its mileage
     /// trigger will be reached, or its time trigger's date, whichever is sooner if
-    /// both are set.
-    static func recalculatedNextDue(for task: TaskItem, car: Car, asOf now: Date = Date()) -> Date? {
+    /// both are set. `justCompleted`, if passed, is a completion the caller just
+    /// inserted but that may not yet be reflected in `task.doneItems` at read time
+    /// (see RecurrenceEngine.recalculatedNextDue's `justCompletedAt` for why that
+    /// matters) — used as the anchor/reference point alongside any completions
+    /// already on the task.
+    static func recalculatedNextDue(
+        for task: TaskItem,
+        car: Car,
+        asOf now: Date = Date(),
+        justCompleted: (completedAt: Date, mileageAtCompletion: Int?)? = nil
+    ) -> Date? {
         guard task.recurrenceType == .byMileage else { return task.nextDue }
 
         var mileageDate: Date?
@@ -49,7 +58,8 @@ enum MileageEngine {
             // bare 0, which would understate an existing car's mileage by however
             // much it's actually racked up and make the trigger fire far too late
             // (or, as here, immediately, since "0 + trigger" is already behind).
-            let referenceMileage = task.doneItems.compactMap(\.mileageAtCompletion).max()
+            let historicalMileage = task.doneItems.compactMap(\.mileageAtCompletion).max()
+            let referenceMileage = [historicalMileage, justCompleted?.mileageAtCompletion].compactMap { $0 }.max()
                 ?? car.initialMileage
                 ?? currentEstimate
             let targetMileage = referenceMileage + mileageTrigger
@@ -63,7 +73,8 @@ enum MileageEngine {
 
         var timeDate: Date?
         if let months = task.timeTriggerMonths {
-            let anchor = task.doneItems.map(\.completedAt).max() ?? task.firstOccurrence
+            let historicalCompletion = task.doneItems.map(\.completedAt).max()
+            let anchor = [historicalCompletion, justCompleted?.completedAt].compactMap { $0 }.max() ?? task.firstOccurrence
             timeDate = Calendar.current.date(byAdding: .month, value: months, to: anchor)
         }
 
@@ -71,7 +82,14 @@ enum MileageEngine {
         case let (m?, t?): return min(m, t)
         case let (m?, nil): return m
         case let (nil, t?): return t
-        case (nil, nil): return task.firstOccurrence
+        case (nil, nil):
+            // Neither trigger produced a usable date (e.g. a mileage-only trigger
+            // with no mileage data yet) — task.firstOccurrence would be a stale,
+            // already-past date once this task has already fired once, which
+            // would leave it permanently "due". Leaving next_due nil instead is
+            // silence until there's actually enough data to compute a real
+            // estimate (the next mileage-prompt save recalculates this).
+            return nil
         }
     }
 

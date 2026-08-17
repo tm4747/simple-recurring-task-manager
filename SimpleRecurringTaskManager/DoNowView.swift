@@ -218,9 +218,11 @@ struct DoNowView: View {
 
     private func markDone(note: String? = nil, wasDone: Bool = true) {
         let trimmedNote = note?.trimmingCharacters(in: .whitespacesAndNewlines)
-        let mileageAtCompletion = task.car.flatMap { MileageEngine.estimatedCurrentMileage(for: $0) }
+        let completedAt = Date()
+        let mileageAtCompletion = task.car.flatMap { MileageEngine.estimatedCurrentMileage(for: $0, asOf: completedAt) }
         let doneItem = TaskDoneItem(
             task: task,
+            completedAt: completedAt,
             wasDone: wasDone,
             note: (trimmedNote?.isEmpty == false) ? trimmedNote : nil,
             mileageAtCompletion: mileageAtCompletion,
@@ -232,10 +234,19 @@ struct DoNowView: View {
         task.snoozeUntil = nil
         task.doingNowDeadline = nil
         task.updatedAt = Date()
+        // Pass this completion explicitly rather than relying on task.doneItems
+        // already reflecting the insert above at read time — see
+        // RecurrenceEngine.recalculatedNextDue's justCompletedAt doc comment for
+        // why that matters (it's what was letting the alarm re-fire right after
+        // Done).
         if let car = task.car {
-            task.nextDue = MileageEngine.recalculatedNextDue(for: task, car: car)
+            task.nextDue = MileageEngine.recalculatedNextDue(
+                for: task,
+                car: car,
+                justCompleted: (completedAt: completedAt, mileageAtCompletion: mileageAtCompletion)
+            )
         } else {
-            task.nextDue = RecurrenceEngine.recalculatedNextDue(for: task)
+            task.nextDue = RecurrenceEngine.recalculatedNextDue(for: task, justCompletedAt: completedAt)
         }
         rescheduleNotifications(fireDate: task.nextDue)
         AlarmPlayer.shared.stop()

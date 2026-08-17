@@ -12,8 +12,23 @@
 import Foundation
 
 enum RecurrenceEngine {
-    static func recalculatedNextDue(for task: TaskItem) -> Date? {
-        guard let lastCompletion = task.doneItems.map(\.completedAt).max() else {
+    /// `justCompletedAt` lets a caller that just inserted a new TaskDoneItem pass
+    /// its completedAt explicitly, rather than relying on re-reading
+    /// `task.doneItems` immediately after insert — SwiftData's inverse-relationship
+    /// array isn't guaranteed to reflect a same-context insert synchronously at
+    /// read time, and if it doesn't yet, this would otherwise fall through to
+    /// task.firstOccurrence (a stale, already-past date), leaving next_due <= now
+    /// and re-triggering the alarm for a task the user just marked Done.
+    static func recalculatedNextDue(for task: TaskItem, justCompletedAt: Date? = nil) -> Date? {
+        let historicalCompletion = task.doneItems.map(\.completedAt).max()
+        let lastCompletion: Date?
+        switch (historicalCompletion, justCompletedAt) {
+        case let (h?, j?): lastCompletion = max(h, j)
+        case let (h?, nil): lastCompletion = h
+        case let (nil, j?): lastCompletion = j
+        case (nil, nil): lastCompletion = nil
+        }
+        guard let lastCompletion else {
             return task.firstOccurrence
         }
         switch task.recurrenceType {

@@ -80,6 +80,40 @@ struct MileageEngineTests {
         }
     }
 
+    // Regression test: a mileage-only trigger with no mileage data yet (no
+    // entries, no initialMileage, no monthlyMileageEstimate) must not fall back
+    // to task.firstOccurrence — once the task has already fired once, that's a
+    // stale past date, which would leave next_due <= now and the task
+    // perpetually "due for decision" even right after being marked Done.
+    @Test func recalculatedNextDueIsNilWhenNeitherTriggerHasEnoughDataInsteadOfFallingBackToAStaleDate() {
+        let car = Car(name: "Civic")
+        let task = TaskItem(title: "Oil change", car: car, recurrenceType: .byMileage, firstOccurrence: date(2026, 1, 1))
+        task.mileageTrigger = 5000
+        let next = MileageEngine.recalculatedNextDue(for: task, car: car, asOf: date(2026, 6, 1))
+        #expect(next == nil)
+    }
+
+    @Test func recalculatedNextDueUsesJustCompletedMileageEvenWhenDoneItemsDoesNotYetReflectIt() {
+        let car = Car(name: "Civic", monthlyMileageEstimate: 1000)
+        car.mileageEntries = [MileageEntry(car: car, mileage: 10000, recordedAt: date(2026, 1, 1), isUserEntered: true)]
+        let task = TaskItem(title: "Oil change", car: car, recurrenceType: .byMileage, firstOccurrence: date(2026, 1, 1))
+        task.mileageTrigger = 5000
+        // Deliberately NOT appending to task.doneItems, same as the RecurrenceEngine
+        // regression test — simulating the moment right after
+        // modelContext.insert(doneItem) before the inverse relationship propagates.
+        let next = MileageEngine.recalculatedNextDue(
+            for: task,
+            car: car,
+            asOf: date(2026, 1, 1),
+            justCompleted: (completedAt: date(2026, 1, 1), mileageAtCompletion: 10000)
+        )
+        #expect(next != nil)
+        if let next {
+            let months = MileageEngine.monthsBetween(date(2026, 1, 1), next)
+            #expect(months > 4.5 && months < 5.5)
+        }
+    }
+
     @Test func recalculatedNextDueUsesTimeTriggerWhenOnlyTimeSet() {
         let car = Car(name: "Civic")
         let task = TaskItem(title: "Inspection", car: car, recurrenceType: .byMileage, firstOccurrence: date(2026, 1, 1))
