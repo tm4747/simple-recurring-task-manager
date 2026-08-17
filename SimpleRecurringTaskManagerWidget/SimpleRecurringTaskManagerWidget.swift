@@ -2,10 +2,10 @@
 //  SimpleRecurringTaskManagerWidget.swift
 //  SimpleRecurringTaskManagerWidget
 //
-//  Shows the next 3 upcoming tasks (title + time until due + category), reading
-//  the same SwiftData store as the main app via the shared App Group container
-//  (see Shared/SharedModelContainer.swift). Each row deep-links back into the app
-//  via the simplerecurringtaskmanager:// URL scheme, handled in ContentView.
+//  Shows the next 3 upcoming tasks (title + time until due), reading the same
+//  SwiftData store as the main app via the shared App Group container (see
+//  Shared/SharedModelContainer.swift). Each row deep-links back into the app via
+//  the simplerecurringtaskmanager:// URL scheme, handled in ContentView.
 //
 
 import WidgetKit
@@ -15,7 +15,6 @@ import SwiftData
 struct UpcomingTaskInfo: Identifiable {
     let id: UUID
     let title: String
-    let categoryName: String?
     let nextDue: Date
 }
 
@@ -27,7 +26,7 @@ struct UpcomingTasksEntry: TimelineEntry {
 struct Provider: TimelineProvider {
     func placeholder(in context: Context) -> UpcomingTasksEntry {
         UpcomingTasksEntry(date: Date(), tasks: [
-            UpcomingTaskInfo(id: UUID(), title: "Change oil", categoryName: "Car Maintenance", nextDue: Date().addingTimeInterval(3600)),
+            UpcomingTaskInfo(id: UUID(), title: "Change oil", nextDue: Date().addingTimeInterval(3600)),
         ])
     }
 
@@ -55,7 +54,7 @@ struct Provider: TimelineProvider {
             }
             .sorted { $0.1 < $1.1 }
             .prefix(3)
-            .map { UpcomingTaskInfo(id: $0.0.id, title: $0.0.title, categoryName: $0.0.category?.name, nextDue: $0.1) }
+            .map { UpcomingTaskInfo(id: $0.0.id, title: $0.0.title, nextDue: $0.1) }
     }
 }
 
@@ -82,15 +81,10 @@ struct SimpleRecurringTaskManagerWidgetEntryView: View {
                                 .font(.subheadline.weight(.semibold))
                                 .lineLimit(1)
                                 .foregroundStyle(.primary)
-                            HStack(spacing: 4) {
-                                if let categoryName = task.categoryName {
-                                    Text(categoryName)
-                                }
-                                Text(task.nextDue, style: .relative)
-                            }
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
+                            Text(task.nextDue, style: .relative)
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
                         }
                     }
                 }
@@ -122,7 +116,7 @@ struct SimpleRecurringTaskManagerWidget: Widget {
     SimpleRecurringTaskManagerWidget()
 } timeline: {
     UpcomingTasksEntry(date: .now, tasks: [
-        UpcomingTaskInfo(id: UUID(), title: "Change oil", categoryName: "Car Maintenance", nextDue: Date().addingTimeInterval(3600)),
-        UpcomingTaskInfo(id: UUID(), title: "Clean gutters", categoryName: nil, nextDue: Date().addingTimeInterval(86400)),
+        UpcomingTaskInfo(id: UUID(), title: "Change oil", nextDue: Date().addingTimeInterval(3600)),
+        UpcomingTaskInfo(id: UUID(), title: "Clean gutters", nextDue: Date().addingTimeInterval(86400)),
     ])
 }
