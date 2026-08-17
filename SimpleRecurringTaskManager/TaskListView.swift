@@ -57,12 +57,12 @@ struct TaskListView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ScreenHeaderBar(title: "Tasks", trailingAccessory: {
+            ScreenHeaderBar(title: "Tasks", titleAccessory: {
                 Button {
                     isShowingNewTask = true
                 } label: {
-                    Image(systemName: "plus")
-                        .font(.system(size: 17, weight: .semibold))
+                    Image(systemName: "plus.circle")
+                        .font(.system(size: 24, weight: .semibold))
                         .foregroundStyle(theme.colors.accent)
                 }
                 .accessibilityLabel("New Task")
@@ -175,21 +175,23 @@ struct TaskListView: View {
 
             Spacer()
 
-            Button {
-                isShowingManageCategories = true
-            } label: {
-                Image(systemName: "list.bullet")
-                    .foregroundStyle(theme.colors.secondaryText)
-            }
-            .accessibilityLabel("Manage Categories")
+            HStack(spacing: 20) {
+                Button {
+                    isShowingNewCategory = true
+                } label: {
+                    Image(systemName: "folder.badge.plus")
+                        .foregroundStyle(theme.colors.secondaryText)
+                }
+                .accessibilityLabel("New Category")
 
-            Button {
-                isShowingNewCategory = true
-            } label: {
-                Image(systemName: "folder.badge.plus")
-                    .foregroundStyle(theme.colors.secondaryText)
+                Button {
+                    isShowingManageCategories = true
+                } label: {
+                    Image(systemName: "list.bullet")
+                        .foregroundStyle(theme.colors.secondaryText)
+                }
+                .accessibilityLabel("Manage Categories")
             }
-            .accessibilityLabel("New Category")
         }
         .padding(.horizontal)
         .padding(.bottom, 8)

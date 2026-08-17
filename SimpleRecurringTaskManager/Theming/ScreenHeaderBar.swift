@@ -13,20 +13,27 @@
 
 import SwiftUI
 
-struct ScreenHeaderBar<TrailingAccessory: View>: View {
+struct ScreenHeaderBar<TitleAccessory: View, TrailingAccessory: View>: View {
     @Environment(\.theme) private var theme
 
     let title: String
     var onBack: (() -> Void)?
+    /// Rendered immediately after the title text, before the flexible space —
+    /// for a control that reads as belonging to the title itself (e.g. Tasks'
+    /// "+" new-task button), as distinct from `trailingAccessory`, which sits
+    /// at the opposite end next to the theme switcher.
+    @ViewBuilder var titleAccessory: () -> TitleAccessory
     @ViewBuilder var trailingAccessory: () -> TrailingAccessory
 
     init(
         title: String,
         onBack: (() -> Void)? = nil,
+        @ViewBuilder titleAccessory: @escaping () -> TitleAccessory = { EmptyView() },
         @ViewBuilder trailingAccessory: @escaping () -> TrailingAccessory = { EmptyView() }
     ) {
         self.title = title
         self.onBack = onBack
+        self.titleAccessory = titleAccessory
         self.trailingAccessory = trailingAccessory
     }
 
@@ -45,6 +52,7 @@ struct ScreenHeaderBar<TrailingAccessory: View>: View {
                 .font(.system(size: 32, weight: .bold))
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
+            titleAccessory()
             Spacer(minLength: 12)
             trailingAccessory()
             ThemeSwitchButton()
