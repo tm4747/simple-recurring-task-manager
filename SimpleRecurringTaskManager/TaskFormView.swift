@@ -10,6 +10,22 @@
 import SwiftUI
 import SwiftData
 
+/// How a brand-new task's schedule gets seeded — only relevant at creation time
+/// (see TaskFormView.schedulingSection), since an existing task's schedule is
+/// already anchored to its real completion history.
+private enum ScheduleBasis: Hashable {
+    /// The user directly states when the task is next due — the original,
+    /// only behavior before the other two options existed.
+    case nextOccurrence
+    /// The user states when they last did it; next_due is computed from that
+    /// by stepping the recurrence cadence forward, same as completing the task
+    /// normally would.
+    case lastTimeDone
+    /// Shorthand for "I'm doing this for the first time right now" — lastTimeDone
+    /// pinned to the current moment, no date to pick.
+    case startNow
+}
+
 struct TaskFormView: View {
     @Environment(\.theme) private var theme
     @Environment(\.modelContext) private var modelContext
@@ -27,6 +43,8 @@ struct TaskFormView: View {
     @State private var recurrenceWeekday = 1
     @State private var recurrenceWeekdays: Set<Int> = []
     @State private var firstOccurrence = Date()
+    @State private var scheduleBasis: ScheduleBasis = .nextOccurrence
+    @State private var lastTimeDoneDate = Date()
     @State private var hasTimeTakesToDo = false
     @State private var timeTakesToDoSeconds = 1800
     @State private var timeTakesToCheckSeconds = 900
@@ -249,8 +267,29 @@ struct TaskFormView: View {
 
     private var schedulingSection: some View {
         Section {
-            DatePicker("First Occurrence", selection: $firstOccurrence)
+            if isEditing {
+                DatePicker("First Occurrence", selection: $firstOccurrence)
+                    .listRowBackground(theme.colors.surface)
+            } else {
+                Picker("Schedule Based On", selection: $scheduleBasis) {
+                    Text("Next Occurrence").tag(ScheduleBasis.nextOccurrence)
+                    Text("Last Time Done").tag(ScheduleBasis.lastTimeDone)
+                    Text("Start Now").tag(ScheduleBasis.startNow)
+                }
+                .pickerStyle(.segmented)
                 .listRowBackground(theme.colors.surface)
+
+                switch scheduleBasis {
+                case .nextOccurrence:
+                    DatePicker("Next Occurrence", selection: $firstOccurrence)
+                        .listRowBackground(theme.colors.surface)
+                case .lastTimeDone:
+                    DatePicker("Last Time Done", selection: $lastTimeDoneDate)
+                        .listRowBackground(theme.colors.surface)
+                case .startNow:
+                    EmptyView()
+                }
+            }
 
             Toggle("Set Time to Do", isOn: $hasTimeTakesToDo)
                 .listRowBackground(theme.colors.surface)
@@ -268,6 +307,21 @@ struct TaskFormView: View {
             }
         } header: {
             Text("Schedule")
+        } footer: {
+            if !isEditing {
+                Text(scheduleFooterText)
+            }
+        }
+    }
+
+    private var scheduleFooterText: String {
+        switch scheduleBasis {
+        case .nextOccurrence:
+            return "The task is due at exactly the date/time you pick here."
+        case .lastTimeDone:
+            return "The task's next due date is calculated from this date using its recurrence — same as if you'd marked it Done then."
+        case .startNow:
+            return "Treated as if you just did it — the next due date is calculated from right now using its recurrence."
         }
     }
 
@@ -316,17 +370,55 @@ struct TaskFormView: View {
         task.recurrenceWeekNumber = recurrenceType == .nthWeekdayOfMonth ? recurrenceWeekNumber : nil
         task.recurrenceWeekday = recurrenceType == .nthWeekdayOfMonth ? recurrenceWeekday : nil
         task.recurrenceWeekdays = recurrenceType == .specificWeekdays ? Array(recurrenceWeekdays).sorted() : nil
-        task.firstOccurrence = firstOccurrence
         task.timeTakesToDo = hasTimeTakesToDo ? TimeInterval(timeTakesToDoSeconds) : nil
         task.timeTakesToCheck = isCheckFirst ? TimeInterval(timeTakesToCheckSeconds) : nil
         task.car = isCarMaintenance ? selectedCar : nil
         task.mileageTrigger = isCarMaintenance ? mileageTrigger : nil
         task.timeTriggerMonths = isCarMaintenance ? timeTriggerMonths : nil
         task.updatedAt = Date()
-        if let car = task.car {
-            task.nextDue = MileageEngine.recalculatedNextDue(for: task, car: car)
+
+        // "Last Time Done" / "Start Now" seed a backdated completion so next_due
+        // comes out of the normal recurrence math (same as marking the task Done
+        // would), instead of the user having to compute the next occurrence by
+        // hand. Only meaningful at creation — an existing task's schedule is
+        // already anchored to its real completion history.
+        let seedCompletionDate: Date? = {
+            guard !isEditing else { return nil }
+            switch scheduleBasis {
+            case .nextOccurrence: return nil
+            case .lastTimeDone: return lastTimeDoneDate
+            case .startNow: return Date()
+            }
+        }()
+
+        if let seedCompletionDate {
+            let mileageAtCompletion = task.car.flatMap { MileageEngine.estimatedCurrentMileage(for: $0, asOf: seedCompletionDate) }
+            modelContext.insert(TaskDoneItem(
+                task: task,
+                completedAt: seedCompletionDate,
+                wasDone: true,
+                mileageAtCompletion: mileageAtCompletion
+            ))
+            if let car = task.car {
+                task.nextDue = MileageEngine.recalculatedNextDue(
+                    for: task,
+                    car: car,
+                    justCompleted: (completedAt: seedCompletionDate, mileageAtCompletion: mileageAtCompletion)
+                )
+            } else {
+                task.nextDue = RecurrenceEngine.recalculatedNextDue(for: task, justCompletedAt: seedCompletionDate)
+            }
+            // Represents "the first future alarm" — with a seeded completion,
+            // that's the freshly computed next_due, not the (past) completion
+            // date itself.
+            task.firstOccurrence = task.nextDue ?? seedCompletionDate
         } else {
-            task.nextDue = RecurrenceEngine.recalculatedNextDue(for: task)
+            task.firstOccurrence = firstOccurrence
+            if let car = task.car {
+                task.nextDue = MileageEngine.recalculatedNextDue(for: task, car: car)
+            } else {
+                task.nextDue = RecurrenceEngine.recalculatedNextDue(for: task)
+            }
         }
 
         let settings = AppSettings.shared(in: modelContext)

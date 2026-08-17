@@ -86,4 +86,33 @@ final class TaskCreationUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Edit Task"].waitForExistence(timeout: 5))
         XCTAssertEqual(app.textFields["Task Title"].value as? String, "Change air filter")
     }
+
+    // Unlike the default "Next Occurrence" (which defaults to right now, making
+    // a freshly created task immediately due), "Start Now" treats the task as
+    // just completed and computes next_due from the recurrence cadence — so a
+    // weekly task created this way should NOT immediately surface the Do Now
+    // flow, and should show a future-dated row instead.
+    func testStartNowScheduleBasisDoesNotMakeTheTaskImmediatelyDue() {
+        let app = launchApp()
+        app.buttons["TaskListView.NewTask"].tap()
+
+        let titleField = app.textFields["Task Title"]
+        XCTAssertTrue(titleField.waitForExistence(timeout: 5))
+        titleField.tap()
+        titleField.typeText("Water plants")
+
+        app.buttons["Start Now"].tap()
+        app.buttons["Create Task"].tap()
+
+        // No "Do It This Evening" (or any Do Now button) should ever appear —
+        // give it a moment, then assert the list row directly.
+        let deferButton = app.buttons["Do It This Evening"]
+        XCTAssertFalse(deferButton.waitForExistence(timeout: 3))
+
+        let taskRow = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] %@", "Water plants")).firstMatch
+        XCTAssertTrue(taskRow.waitForExistence(timeout: 5))
+        // A real (non-nil) next_due confirms the weekly cadence actually ran
+        // rather than the task silently ending up with no schedule at all.
+        XCTAssertFalse(taskRow.label.localizedCaseInsensitiveContains("No due date"))
+    }
 }
