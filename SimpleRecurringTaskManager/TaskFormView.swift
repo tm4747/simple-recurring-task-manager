@@ -272,8 +272,8 @@ struct TaskFormView: View {
                     .listRowBackground(theme.colors.surface)
             } else {
                 Picker("Schedule Based On", selection: $scheduleBasis) {
-                    Text("Next Occurrence").tag(ScheduleBasis.nextOccurrence)
-                    Text("Last Time Done").tag(ScheduleBasis.lastTimeDone)
+                    Text("Next Occurs").tag(ScheduleBasis.nextOccurrence)
+                    Text("Last Done").tag(ScheduleBasis.lastTimeDone)
                     Text("Start Now").tag(ScheduleBasis.startNow)
                 }
                 .pickerStyle(.segmented)
@@ -281,17 +281,17 @@ struct TaskFormView: View {
 
                 switch scheduleBasis {
                 case .nextOccurrence:
-                    DatePicker("Next Occurrence", selection: $firstOccurrence)
+                    DatePicker("Next Occurs", selection: $firstOccurrence)
                         .listRowBackground(theme.colors.surface)
                 case .lastTimeDone:
-                    DatePicker("Last Time Done", selection: $lastTimeDoneDate)
+                    DatePicker("Last Done", selection: $lastTimeDoneDate)
                         .listRowBackground(theme.colors.surface)
                 case .startNow:
                     EmptyView()
                 }
             }
 
-            Toggle("Set Time to Do", isOn: $hasTimeTakesToDo)
+            Toggle("Set time of day to do", isOn: $hasTimeTakesToDo)
                 .listRowBackground(theme.colors.surface)
             if hasTimeTakesToDo {
                 HourMinutePicker(totalSeconds: $timeTakesToDoSeconds)
@@ -377,7 +377,7 @@ struct TaskFormView: View {
         task.timeTriggerMonths = isCarMaintenance ? timeTriggerMonths : nil
         task.updatedAt = Date()
 
-        // "Last Time Done" / "Start Now" seed a backdated completion so next_due
+        // "Last Done" / "Start Now" seed a backdated completion so next_due
         // comes out of the normal recurrence math (same as marking the task Done
         // would), instead of the user having to compute the next occurrence by
         // hand. Only meaningful at creation — an existing task's schedule is

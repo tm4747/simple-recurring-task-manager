@@ -87,7 +87,7 @@ final class TaskCreationUITests: XCTestCase {
         XCTAssertEqual(app.textFields["Task Title"].value as? String, "Change air filter")
     }
 
-    // Unlike the default "Next Occurrence" (which defaults to right now, making
+    // Unlike the default "Next Occurs" (which defaults to right now, making
     // a freshly created task immediately due), "Start Now" treats the task as
     // just completed and computes next_due from the recurrence cadence — so a
     // weekly task created this way should NOT immediately surface the Do Now
