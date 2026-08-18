@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-An iOS app (SwiftUI + SwiftData) implementing recurring/one-time task reminders that actively alarm and re-notify until dealt with — not a passive checklist. Full product spec, data model, and the phase-by-phase build plan this app was built against live in `docs/PRD.md`; read it before making product-behavior decisions, since it's the source of truth for intended behavior (recurrence rules, Do Now button semantics, mileage prompting schedule, etc.).
+An iOS app (SwiftUI + SwiftData) implementing recurring/one-time task reminders that actively alarm and re-notify until dealt with — not a passive checklist. `docs/PRD.md` is the original, now-stale plan this app was first built against — useful for historical context but not current behavior. `docs/APP_SPEC.md` is the up-to-date, platform-agnostic feature spec (written to be usable as a build reference for a possible Android port); read it before making product-behavior decisions.
+
+**Keeping `docs/APP_SPEC.md` current**: this doc is deliberately updated on a release cadence, not on every commit. When the user says they've shipped/released a build (e.g. "just released a build," "shipped to TestFlight," "pushed a new version"), run `git log` back to APP_SPEC.md's last update (check its last commit date/hash) and review what changed; update the spec's affected sections to match, then ask before committing/pushing the doc update unless already told to do so autonomously.
 
 Two sibling projects at `../SimpleTimer` and `../SimpleBoxingTimer` are the source of several ported subsystems (theme system, voice-to-text, header bar, Past-Done-style history grouping) — when extending those subsystems, check the sibling's implementation for the established convention rather than inventing a new one.
 
